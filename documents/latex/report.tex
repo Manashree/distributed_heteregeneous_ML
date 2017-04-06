@@ -1,0 +1,251 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% See the \addtolength command later in the file to balance the column lengths
+% on the last page of the document
+\documentclass[10pt,onecolumn]{IEEEtran}
+
+
+% The following packages can be found on http:\\www.ctan.org
+%\usepackage{graphics} % for pdf, bitmapped graphics files
+%\usepackage{epsfig} % for postscript graphics files
+%\usepackage{mathptmx} % assumes new font selection scheme installed
+%\usepackage{times} % assumes new font selection scheme installed
+%\usepackage{amsmath} % assumes amsmath package installed
+%\usepackage{amssymb}  % assumes amsmath package installed
+\usepackage{pdflscape}
+\usepackage{afterpage}
+\usepackage{capt-of}% or use the larger `caption` package
+\usepackage{tabulary}
+\usepackage{lipsum}% dummy text
+\usepackage{hyperref}
+
+\title{\LARGE \bf
+Parameterized, Automated and Distributed Machine Learning
+}
+ 
+\author{ 
+		 \parbox{3 in}
+		 {\centering Ashwin Nimhan
+         Student of Data Science\\
+         Indiana University Bloomington\\
+         {\tt\small animhan@indiana.edu}}
+         \hspace*{ 0.5 in}
+         \parbox{3 in}{\centering Manashree Rao
+         Student of Data Science\\
+         Indiana University Bloomington\\
+         {\tt\small manarao@indiana.edu}}
+         \hspace*{ 0.5 in}
+}
+
+\begin{document}
+
+\maketitle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+
+Keywords: Data Pipeline, Auto ML, Black-box ML, predictive modelling
+\end{abstract}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{INTRODUCTION}
+Machine learning has achieved considerable successes in recent years and an ever-growing number of disciplines rely on it. However, this success crucially relies on human machine learning experts, who select appropriate features, workflows, machine learning paradigms, algorithms, and their hyperparameters.  
+The research area that targets progressive automation of machine learning is AutoML. The goal is to design the perfect machine learning “black box” capable of performing all model selection and hyper-parameter tuning without any human intervention. 
+The current approaches in the AutoML field are heavily dependent on underlying platform and supported languages, like auto-sklearn or auto-weka. What we want to achieve is try to scale this across multiple programming languages, i.e., use python, R, Spark ML, etc. together for ML tasks like choosing a machine learning model, tuning hyper-parameters, avoiding overfitting and optimization for a provided evaluation metric.
+
+
+\section{Survey of existing systems}
+
+\subsection{AutoCompete}
+
+\subsection{Auto-Sklearn}
+
+\subsection{Auto-WEKA}
+
+\subsection{Hyperopt-Sklearn}
+
+
+
+\section{Workflow Management Systems}
+\subsection{Typical stages of Workflow Management}
+\begin{itemize}
+\item Create Jobs to interact with systems that operate on Data - Hive/Presto/HDFS/Postgres/S3 etc
+\item (Dynamic) Workflow creation based on the number of sources, size of data, business logic, variety of data, changes in the schema, etc.
+\item Manage Dependencies between Operations like Upstream, Downstream, Cross Pipeline dependencies, Previous Job state, etc.
+\item Schedule the Jobs/Operations like Calendar schedule, Event Driven, Cron Expression etc.
+\item Keep track of the Operations and the metrics of the workflow, monitor the current/historic state of the jobs, the results of the jobs etc.
+\item Ensure Fault tolerance of the pipelines and have the capability to back fill any missing data, etc.
+\end{itemize}
+   
+\subsection{Survey of Data Pipelines and Workflow Management Systems}
+There are different workflow management systems like:
+\begin{itemize}
+\item Oozie - Oozie is a workflow scheduler system to manage Apache Hadoop jobs
+\item Luigi - Luigi is a Python module that helps you build complex pipelines of batch jobs.
+\item Airflow - Airflow is a platform to programmatically author, schedule and monitor workflows.
+\item Azkaban - Azkaban is a batch workflow job scheduler created at LinkedIn to run Hadoop jobs.
+\item Pinball - Pinball is a scalable workflow manager developed at Pinterest.
+\end{itemize}
+
+We compare these systems as per our requirements.
+\subsection{Comparison of existing systems}
+
+{\small
+\begin{tabulary}{\linewidth}{|C|C|L|L|}
+
+\hline
+Feature & Luigi & Airflow & Pinball \\
+\hline
+Data Pipeline & Tasks are grouped together into a DAG to be run. Most of the code treats Tasks as the main unit of work. & DAG (Directed Acyclic Graph) is used to define Jobs. & Workflow \\
+\hline
+Class processing the main unit of work & Tasks\//Workers & Operators & Jobs\//Workers \\
+UI & Overview of Tasks only & Comprehensive, with multiple screens & Detailed, looks like Sidekiq \\
+\hline
+metadata\//job status &	Task status is stored in database. Similar to Airflow, but fewer details. &	Job status is stored in a database. Operators mark jobs as passed or failed. Last updated is refreshed frequently with a heartbeat function. kill\_zombies() is called to clear all jobs with older heartbeats. &	Workers 'claim' messages from the queue with an ownership timestamp on the message. This lease claim gets renewed frequently.
+Messages with older lease claims are requeued. Messages successfully processed are archived to S3 file system using Secor. Job status is stored to database. \\
+\hline
+scaling	& Create multiple Tasks &	DAGs can be constructed with multiple Operators.    Scale out by adding Celery workers & Add Workers \\
+\hline
+parallel execution	& Subprocess &	Subprocess &	Threading \\
+\hline
+dependency management	& Tasks can be constructed with requires() method	& Operators can be constructed with depends\_on\_past parameter &	Jobs can require other jobs to finish first before starting, eg child\_job requires parent\_job. \\
+\hline
+Code	& Code	& Code	& Python dict+code \\
+\hline
+state persistence	& uses SQLAlchemy for abstracting away the choice of and querying the database(Mysql\//Postgresql)	& It supports any store that is supported by SQL Alchemy. If you don't use a external store, the state is not saved (only log file). The status of a task is always checked based on the existence of its output. & Yes to db \\
+\hline
+tracks history	& Yes to db	& Yes &	Yes to db \\
+\hline
+messaging queue\//message broker	& No & Celery and RabbitMQ\//Reddis	& No \\
+\hline
+fault tolerance	& No &	Yes &	Yes\\
+\hline
+hadoop & yes  & yes  & yes  \\
+pig  & yes  & yes  & no \\
+hive  & yes  & yes  & yes  \\
+pgsql  & yes  & yes  & no \\
+mysql & yes  & yes  & no \\
+redshift & no  & yes  & no   \\
+s3 & yes  & yes  & yes  \\
+\hline
+\end{tabulary} 
+}
+
+\section{Architecture of our System}
+   \begin{figure}[thpb]
+      \centering
+      \framebox{\parbox{3in}{We suggest that you use a text box to insert a graphic (which is ideally a 300 dpi TIFF or EPS file, with all fonts embedded) because, in an document, this method is somewhat more stable than directly inserting a picture.
+}}
+      %\includegraphics[scale=1.0]{figurefile}
+      \caption{Inductance of oscillation winding on amorphous
+       magnetic core versus DC bias magnetic field}
+      \label{figurelabel}
+   \end{figure}
+   
+
+Figure Labels: Use 8 point Times New Roman for Figure labels. Use words rather than symbols or abbreviations when writing Figure axis labels to avoid confusing the reader. As an example, write the quantity ÒMagnetizationÓ, or ÒMagnetization, MÓ, not just ÒMÓ. If including units in the label, present them within parentheses. Do not label axes only with units. In the example, write ÒMagnetization (A/m)Ó or ÒMagnetization {A[m(1)]}Ó, not just ÒA/mÓ. Do not label axes with a ratio of quantities and units. For example, write ÒTemperature (K)Ó, not ÒTemperature/K.Ó
+\section{Airflow}
+\subsection{Introduction to Airflow}
+Using Airflow, we can programmatically create and schedule data pipelines. A few basic principles of Airflow are:
+\begin{itemize}
+\item DAGs:
+\item Operators: 
+\item Scheduling the DAGs/Tasks
+\item Executors
+\end{itemize}
+\subsection{Installation of Airflow}
+\subsubsection{For single node}
+
+Installing and configuring Apache Airflow
+\begin{verbatim}
+Installing and configuring Apache Airflow
+
+Install Dependencies
+	apt-get update
+	apt-get install unzip
+	apt-get install build-essential
+	apt-get install python-dev
+	apt-get install libsasl2-dev
+	apt-get install python-pandas	
+
+Installing Pip
+	cd /tmp/
+	wget https://bootstrap.pypa.io/ez_setup.py
+	python ez_setup.py
+	unzip setuptools-X.X.zip
+	cd setuptools-X.X
+	easy_install pip
+
+Install MySQL
+	sudo apt-get install mysql-server
+	apt-get install libmysqlclient-dev
+	pip install MySQL-python
+
+Install RabbitMQ
+	apt-get install rabbitmq-server
+
+Install airflow and required libraries
+	pip install airflow=1.7.0
+	pip install airflow[mysql]
+	pip install airflow[rabbitmq]
+	pip install airflow[celery]
+
+Configuring Airflow
+Changes in airflow configuration file at {AIRFLOW_HOME}/airflow.cfg
+	executor = CeleryExecutor
+	sql_alchemy_conn = mysql://root:root@localhost:3306/airflow
+	broker_url = amqp://guest:guest@localhost:5672/
+	celery_result_backend = db+mysql://root:root@localhost:3306/airflow
+
+On Master execute following initialization commands (Initialize the Airflow database, start the web server and scheduler)
+	service rabbitmq-server start
+	airflow initdb
+	airflow webserver
+	airflow scheduler
+	airflow flower
+
+On Worker execute the following commands (Initialize Airflow worker)
+	airflow worker
+\end{verbatim}
+
+\subsubsection{For multi-node setup}
+\section{CONCLUSIONS}
+
+A conclusion section is not required. Although a conclusion may review the main points of the paper, do not replicate the abstract as the conclusion. A conclusion might elaborate on the importance of the work or suggest applications and extensions. 
+
+\addtolength{\textheight}{-12cm}   % This command serves to balance the column lengths
+                                  % on the last page of the document manually. It shortens
+                                  % the textheight of the last page by a suitable amount.
+                                  % This command does not take effect until the next page
+                                  % so it should come on the page before the last. Make
+                                  % sure that you do not shorten the textheight too much.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{APPENDIX}
+
+Appendixes should appear before the acknowledgment.
+
+\section*{ACKNOWLEDGMENT}
+
+\begin{thebibliography}{99}
+
+\bibitem{c1} https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf
+\bibitem{c2} http://bytepawn.com/luigi-airflow-pinball.html
+\bibitem{c3} https://www.slideshare.net/r39132/airflow-agari-63072756
+\bibitem{c4} https://www.slideshare.net/erikbern/luigi-presentation-nyc-data-science
+\bibitem{c5} https://www.slideshare.net/growthintel/a-beginners-guide-to-building-data-pipelines-with-luigi
+\bibitem{c6} https://www.michaelcho.me/article/data-pipelines-airflow-vs-pinball-vs-luigi
+\bibitem{c7} 
+\bibitem{c8} 
+\bibitem{c9} 	
+
+\end{thebibliography}
+
+\end{document}
