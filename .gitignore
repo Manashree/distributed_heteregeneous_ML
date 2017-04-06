@@ -87,3 +87,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+#latex files
+.log
+.aux
+.out
+.gz
