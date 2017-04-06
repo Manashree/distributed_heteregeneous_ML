@@ -89,7 +89,7 @@ ENV/
 .ropeproject
 
 #latex files
-.log
-.aux
-.out
-.gz
+*.log
+*.aux
+*.out
+*.gz
