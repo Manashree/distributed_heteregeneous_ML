@@ -1,0 +1,60 @@
+Installing and configuring Apache Airflow
+
+Install Dependencies
+apt-get update
+apt-get install unzip
+apt-get install build-essential
+apt-get install python-dev
+apt-get install libsasl2-dev
+apt-get install python-pandas	
+
+Installing Pip
+
+cd /tmp/
+wget https://bootstrap.pypa.io/ez_setup.py
+python ez_setup.py
+unzip setuptools-X.X.zip
+cd setuptools-X.X
+easy_install pip
+
+Install MySQL
+
+sudo apt-get install mysql-server
+apt-get install libmysqlclient-dev
+pip install MySQL-python
+mysql -u root -p
+CREATE DATABASE airflow CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+grant all on airflow.* TO 'root'@'%' IDENTIFIED BY 'root';
+
+
+Install RabbitMQ
+
+apt-get install rabbitmq-server
+
+Install airflow and required libraries
+
+pip install airflow==1.7.0
+pip install airflow[mysql]
+pip install airflow[rabbitmq]
+pip install airflow[celery]
+
+Configuring Airflow
+Changes in airflow configuration file at {AIRFLOW_HOME}/airflow.cfg
+	executor = CeleryExecutor
+	sql_alchemy_conn = mysql://root:root@localhost:3306/airflow
+	load_examples = False
+	broker_url = amqp://guest:guest@localhost:5672/
+	celery_result_backend = db+mysql://root:root@localhost:3306/airflow
+
+On Master execute following initialization commands (Initialize the Airflow database, start the web server and scheduler)
+	service rabbitmq-server start
+	airflow initdb
+	airflow webserver
+	airflow scheduler
+	airflow flower
+
+On Worker execute the following commands (Initialize Airflow worker)
+	airflow worker
+
+References:
+	https://stlong0521.github.io/20161023%20-%20Airflow.html
